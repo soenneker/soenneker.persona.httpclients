@@ -1,20 +1,19 @@
 using Soenneker.Persona.HttpClients.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Persona.HttpClients.Tests;
 
-[Collection("Collection")]
-public sealed class PersonaOpenApiHttpClientTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class PersonaOpenApiHttpClientTests : HostedUnitTest
 {
     private readonly IPersonaOpenApiHttpClient _httpclient;
 
-    public PersonaOpenApiHttpClientTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public PersonaOpenApiHttpClientTests(Host host) : base(host)
     {
         _httpclient = Resolve<IPersonaOpenApiHttpClient>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
