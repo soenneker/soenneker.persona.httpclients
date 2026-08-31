@@ -11,11 +11,11 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.Persona.HttpClients;
 
-///<inheritdoc cref="IPersonaOpenApiHttpClient"/>
 public sealed class PersonaOpenApiHttpClient : IPersonaOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly IConfiguration _config;
+    private readonly string _clientId = $"{nameof(PersonaOpenApiHttpClient)}:{Guid.NewGuid():N}";
 
     private const string _prodBaseUrl = "https://api.withpersona.com/api/v1";
 
@@ -27,12 +27,13 @@ public sealed class PersonaOpenApiHttpClient : IPersonaOpenApiHttpClient
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        return _httpClientCache.Get(nameof(PersonaOpenApiHttpClient), (config: _config, baseUrl: _config["Persona:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
+        return _httpClientCache.Get(_clientId, (config: _config, baseUrl: _config["Persona:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
             var apiKey = state.config.GetValueStrict<string>("Persona:ApiKey");
             string authHeaderName = state.config["Persona:AuthHeaderName"] ?? "Authorization";
             string authHeaderValueTemplate = state.config["Persona:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
+            string apiVersion = state.config["Persona:ApiVersion"] ?? "2025-12-08";
 
             return new HttpClientOptions
             {
@@ -40,25 +41,19 @@ public sealed class PersonaOpenApiHttpClient : IPersonaOpenApiHttpClient
                 DefaultRequestHeaders = new Dictionary<string, string>
                 {
                     {authHeaderName, authHeaderValue},
+                    {"Persona-Version", apiVersion},
                 }
             };
         }, cancellationToken);
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(PersonaOpenApiHttpClient));
+        _httpClientCache.RemoveSync(_clientId);
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
-        return _httpClientCache.Remove(nameof(PersonaOpenApiHttpClient));
+        return _httpClientCache.Remove(_clientId);
     }
 }
