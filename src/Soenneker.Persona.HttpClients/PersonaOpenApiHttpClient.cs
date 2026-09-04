@@ -11,6 +11,7 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.Persona.HttpClients;
 
+/// <inheritdoc cref="IPersonaOpenApiHttpClient" />
 public sealed class PersonaOpenApiHttpClient : IPersonaOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
