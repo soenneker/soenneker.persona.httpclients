@@ -30,7 +30,7 @@ public sealed class PersonaOpenApiHttpClient : IPersonaOpenApiHttpClient
     {
         return _httpClientCache.Get(_clientId, (config: _config, baseUrl: _config["Persona:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
-            var apiKey = state.config.GetValueStrict<string>("Persona:ApiKey");
+            var apiKey = state.config.GetStringStrict("Persona:ApiKey");
             string authHeaderName = state.config["Persona:AuthHeaderName"] ?? "Authorization";
             string authHeaderValueTemplate = state.config["Persona:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
